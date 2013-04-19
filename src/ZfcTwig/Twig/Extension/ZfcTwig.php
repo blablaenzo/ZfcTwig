@@ -22,6 +22,19 @@ class ZfcTwig extends Twig_Extension
         $this->renderer = $renderer;
     }
 
+    public function getFilters()
+    {
+        return array(
+            'exception_class' => new \Twig_Filter_Method($this, 'exceptionClass'),
+        );
+    }
+
+    public function exceptionClass(\Exception $exception)
+    {
+       return get_class($exception);
+    }
+
+
     /**
      * @return \Zend\View\HelperPluginManager
      */
