@@ -194,18 +194,23 @@ class TwigRenderer implements RendererInterface, TreeRendererInterface
             $values = (array) $model->getVariables();
         }
 
-        if ($model && $this->canRenderTrees() && $model->hasChildren()) {
+       if ($model && $this->canRenderTrees() && $model->hasChildren()) {
             if (!isset($values['content'])) {
                 $values['content'] = '';
             }
-            foreach($model as $child) {
-                /** @var \Zend\View\Model\ViewModel $child */
-                $template = $this->resolver->resolve($child->getTemplate(), $this);
-                if ($template) {
-                    return $template->render((array) $child->getVariables());
+            foreach($model->getChildren() as $child) {
+                if ($this->canRender($child->getTemplate())) {
+                    $values[$child->captureTo()] .=
+                        $this->resolver
+                            ->resolve($child->getTemplate())
+                            ->render(
+                                array_merge(
+                                    (array) $model->getVariables(),
+                                    (array) $child->getVariables()
+                                )
+                            );
                 }
                 $child->setOption('has_parent', true);
-                $values['content'] .= $this->view->render($child);
             }
         }
 
